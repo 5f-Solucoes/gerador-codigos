@@ -13,7 +13,7 @@ return new class extends Migration
 {
     Schema::create('parceiros', function (Blueprint $table) {
         $table->id();
-        $table->string('nome', 128);
+        $table->string('nome', 128)->index();
         $table->string('sigla', 16)->nullable();
         $table->foreignId('cadastrado_por')->nullable()->constrained('users');
         $table->timestamps(); 

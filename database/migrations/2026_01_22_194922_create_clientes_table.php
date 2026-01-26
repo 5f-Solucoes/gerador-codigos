@@ -13,8 +13,8 @@ return new class extends Migration
 {
     Schema::create('clientes', function (Blueprint $table) {
         $table->id();
-        $table->string('nome_fantasia', 128);
-        $table->string('razao_social', 128)->nullable();
+        $table->string('nome_fantasia', 128)->index();
+        $table->string('razao_social', 128)->nullable()->index();
         $table->string('cnpj', 32)->nullable()->unique();
         $table->string('site', 128)->nullable();
         $table->foreignId('cadastrado_por')->nullable()->constrained('users');

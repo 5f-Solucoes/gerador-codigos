@@ -14,7 +14,7 @@ return new class extends Migration
     Schema::create('codigo_de_propostas', function (Blueprint $table) {
         $table->id();
         $table->string('codigo_proposta', 255)->nullable()->unique();
-        $table->dateTime('data')->nullable();
+        $table->dateTime('data')->nullable()->index();
         $table->string('descricao', 100);
         $table->string('filial_nome', 255)->nullable(); 
 
@@ -23,10 +23,10 @@ return new class extends Migration
         $table->foreignId('cliente_id')->nullable()->constrained('clientes');
         $table->foreignId('parceiro_id')->nullable()->constrained('parceiros');
         $table->foreignId('produto_id')->nullable()->constrained('produtos');
-        $table->unsignedBigInteger('distribuidor_id')->nullable();
-        $table->unsignedBigInteger('fornecedor_id')->nullable();
+
 
         $table->timestamps();
+        $table->index(['parceiro_id', 'data']);
     });
 }
 

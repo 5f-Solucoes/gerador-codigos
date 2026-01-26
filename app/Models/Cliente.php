@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cliente extends Model
 {
+    protected $table = 'clientes';
     protected $fillable = [
     'nome_fantasia', 
     'razao_social', 
@@ -14,7 +15,7 @@ class Cliente extends Model
     'cadastrado_por'
     ];
 
-public function filiais() {
+    public function filiais() {
     return $this->hasMany(Filial::class);
     }
 }
