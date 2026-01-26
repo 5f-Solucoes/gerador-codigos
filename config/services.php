@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'watchguard' => [
+        'access_id' => env('WATCHGUARD_ACCESS_ID'),
+        'client_secret' => env('WATCHGUARD_CLIENT_SECRET'),
+        'auth_url' => env('WATCHGUARD_AUTH_URL'),
+        'api_base' => env('WATCHGUARD_API_BASE'),
+        'api_key' => env('WATCHGUARD_API_KEY'),
+        'account_id' => env('WATCHGUARD_ACCOUNT_ID'),
+        'resource_id' => env('WATCHGUARD_RESOURCE_ID'),
+    ],
+
 ];

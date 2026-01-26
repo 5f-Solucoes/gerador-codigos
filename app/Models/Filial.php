@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Filial extends Model
 {
+    protected $table = 'filiais';
     protected $fillable = [
         'cliente_id', 
         'cnpj', 

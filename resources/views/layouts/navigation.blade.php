@@ -15,6 +15,17 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @if(in_array(Auth::user()->perfil, ['VENDEDOR', 'GERENTE', 'ADMIN']))
+                    <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                        {{ __('Área Administrativa') }}
+                    </x-nav-link>
+                    @endif
+                    @if(Auth::user()->perfil === 'ADMIN')
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            {{ __('Usuários') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -70,6 +81,18 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @if(in_array(Auth::user()->perfil, ['VENDEDOR', 'GERENTE', 'ADMIN']))
+                <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                    {{ __('Área Administrativa') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if(Auth::user()->perfil === 'ADMIN')
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    {{ __('Usuários') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

@@ -9,4 +9,9 @@ class Produto extends Model
     protected $fillable = [
     'nome', 'sigla', 'parceiro_id', 'cadastrado_por'
     ];
+
+    public function parceiro()
+    {
+        return $this->belongsTo(Parceiro::class);
+    }
 }
