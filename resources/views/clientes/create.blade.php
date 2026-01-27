@@ -1,4 +1,7 @@
 <x-app-layout>
+    <x-slot name="title">
+        Cadastrar Novo Cliente
+    </x-slot>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Cadastrar Cliente') }}
@@ -66,7 +69,7 @@
                                     </div>
                                     <div class="w-1/2">
                                         <x-input-label :value="__('Localidade (Ex: SP, Apenas a sigla)')" />
-                                        <input type="text" :name="'filiais['+index+'][localidade]'" x-model="filial.localidade" placeholder="SAO_PAULO" required
+                                        <input type="text" :name="'filiais['+index+'][localidade]'" x-model="filial.localidade" placeholder="SP" required
                                                class="w-full uppercase border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                     </div>
                                     <div class="pt-6">
@@ -78,7 +81,7 @@
                             </template>
                         </div>
                         
-                        <p class="text-xs text-gray-500 mt-2">Dica: Se o cliente não tem filial, cadastre como "MATRIZ" ou "UNICA".</p>
+                        <p class="text-xs text-gray-500 mt-2">Se o cliente não tem filial, cadastre como matriz.</p>
                     </div>
 
                     <div class="flex items-center justify-end mt-8">

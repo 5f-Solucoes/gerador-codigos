@@ -18,7 +18,6 @@ return new class extends Migration
         $table->string('descricao', 100);
         $table->string('filial_nome', 255)->nullable(); 
 
-        // Chaves Estrangeiras
         $table->foreignId('user_id')->nullable()->constrained('users'); 
         $table->foreignId('cliente_id')->nullable()->constrained('clientes');
         $table->foreignId('parceiro_id')->nullable()->constrained('parceiros');

@@ -61,7 +61,7 @@ class DashboardController extends Controller
         // Busca siglas ativas para o dropdown de troca de responsável
         $siglasAtivas = \App\Models\User::where('status', 'ATIVO')
             ->orderBy('sigla')
-            ->pluck('sigla'); // Pega apenas a coluna sigla
+            ->pluck('sigla'); 
 
         // Tenta extrair a sigla atual do código string (ex: 5F...-SIGLA-...)
         $parts = explode('-', $proposta->codigo_proposta);
@@ -77,7 +77,7 @@ class DashboardController extends Controller
     {
         $proposta = \App\Models\CodigoDeProposta::findOrFail($id);
 
-        // 1. Validação
+        // Validação
         $request->validate([
             'cliente_id' => 'required',
             'filial' => 'required',
@@ -86,32 +86,26 @@ class DashboardController extends Controller
             'descricao' => 'nullable|string'
         ]);
 
-        // 2. Helpers de Limpeza (Padronização)
+        // Helpers de Limpeza
         $limpar = function($str) { return strtoupper(str_replace(' ', '', $str)); };
         $limparDesc = function($str) { return strtoupper(str_replace(' ', '_', trim($str))); };
         $limparFilial = function($str) { return strtoupper(str_replace(' ', '_', trim($str))); };
 
-        // 3. RECUPERA O PREFIXO ORIGINAL (A parte sagrada: 5F + Data + Sequência)
-        // O código é: PREFIXO-SIGLA-CLIENTE...
-        // Vamos explodir e pegar o índice 0.
         $partesCodigo = explode('-', $proposta->codigo_proposta);
-        $prefixoOriginal = $partesCodigo[0]; // Ex: 5F2601231v1
+        $prefixoOriginal = $partesCodigo[0]; 
 
-        // 4. Decide a Sigla
-        // Se o usuário escolheu uma nova sigla no select, usa ela.
-        // Se deixou vazio, mantém a que já estava no código ($partesCodigo[1]).
         $novaSigla = $request->vendedor_sigla;
         if (empty($novaSigla)) {
              $novaSigla = $partesCodigo[1] ?? Auth::user()->sigla;
         }
         $siglaFinal = $limpar($novaSigla);
 
-        // 5. Busca Nomes Novos no Banco
+        // Busca Nomes Novos no Banco
         $cliente = \App\Models\Cliente::find($request->cliente_id);
         $parceiro = \App\Models\Parceiro::find($request->parceiro_id);
         $produto = \App\Models\Produto::find($request->produto_id);
 
-        // 6. Remonta o Sufixo
+        // Remonta o Sufixo
         $nomeCliente = $limpar($cliente->nome_fantasia);
         $nomeFilial = $limparFilial($request->filial);
         $nomeParceiro = $limpar($parceiro->nome);
@@ -123,11 +117,9 @@ class DashboardController extends Controller
             $sufixo .= '-' . $limparDesc($request->descricao);
         }
 
-        // 7. Código Completo Novo
+        // Código Completo Novo
         $codigoCompleto = $prefixoOriginal . $sufixo;
 
-        // 8. Atualiza no Banco
-        // NOTA: Não incluímos 'user_id' nem 'data' aqui, então eles não mudam!
         $proposta->update([
             'codigo_proposta' => $codigoCompleto,
             'descricao'       => $request->descricao,
@@ -135,7 +127,6 @@ class DashboardController extends Controller
             'cliente_id'      => $request->cliente_id,
             'parceiro_id'     => $request->parceiro_id,
             'produto_id'      => $request->produto_id,
-            // updated_at é atualizado automaticamente pelo Laravel
         ]);
 
         return redirect()->route('dashboard')
@@ -162,7 +153,7 @@ class DashboardController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validação
+        // Validação
         $request->validate([
             'vendedor_sigla' => 'required',
             'cliente_id' => 'required|exists:clientes,id',
@@ -172,13 +163,10 @@ class DashboardController extends Controller
             'descricao' => 'nullable|string'
         ]);
 
-        // 2. Busca os OBJETOS no banco para pegar os NOMES corretos
-        // Isso é mais seguro que confiar no texto que vem do HTML
         $cliente = \App\Models\Cliente::find($request->cliente_id);
         $parceiro = \App\Models\Parceiro::find($request->parceiro_id);
         $produto = \App\Models\Produto::find($request->produto_id);
         
-        // 3. Função auxiliar para limpar string (Igual ao seu JS: Remove espaços e Uppercase)
         $limpar = function($str) {
             return strtoupper(str_replace(' ', '', $str));
         };
@@ -186,22 +174,19 @@ class DashboardController extends Controller
             return strtoupper(str_replace(' ', '_', trim($str)));
         };
 
-        // --- PARTE A: O PREFIXO (Sequencial) ---
         $hoje = now();
-        $prefixoData = '5F' . $hoje->format('ymd'); // 5F + 260123
+        $prefixoData = '5F' . $hoje->format('ymd'); 
         
         // Conta quantos códigos já existem hoje para gerar a sequência
         $qtdHoje = \App\Models\CodigoDeProposta::whereDate('created_at', $hoje->toDateString())->count();
         $sequencia = $qtdHoje + 1;
 
-        $parteSequencial = $prefixoData . $sequencia . 'v1'; // Ex: 5F2601231v1
+        $parteSequencial = $prefixoData . $sequencia . 'v1'; 
 
-        // --- PARTE B: O SUFIXO (Informativo) ---
-        // Formato: -SIGLA-CLIENTE-FILIAL-PARCEIRO_PRODUTO
         
         $sigla = $limpar($request->vendedor_sigla);
         $nomeCliente = $limpar($cliente->nome_fantasia);
-        $nomeFilial = strtoupper(str_replace(' ', '_', $request->filial)); // Filial costuma usar underline se tiver espaço? Ou remove? Segui o padrão remove.
+        $nomeFilial = strtoupper(str_replace(' ', '_', $request->filial)); 
         
         $nomeParceiro = $limpar($parceiro->nome);
         $nomeProduto = $limpar($produto->nome);
@@ -214,10 +199,9 @@ class DashboardController extends Controller
             $sufixo .= '-' . $limparDesc($request->descricao);
         }
 
-        // --- CÓDIGO FINAL ---
         $codigoCompleto = $parteSequencial . $sufixo;
 
-        // 4. Salva no Banco
+        // Salva no Banco
         \App\Models\CodigoDeProposta::create([
             'codigo_proposta' => $codigoCompleto,
             'data' => $hoje,

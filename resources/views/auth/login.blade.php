@@ -1,16 +1,8 @@
 <x-guest-layout>
+    <x-slot name="title">
+        Login
+    </x-slot>
     <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <div class="mb-4 text-center">
-        <img src="{{ asset('assets/images/logop.png') }}" alt="Logo" class="h-10 mx-auto mb-2">
-        <h2 class="text-xl font-bold text-gray-800">Login</h2>
-    </div>
-
-    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-        <p class="font-bold"><i class="fas fa-info-circle"></i> Versão de Teste</p>
-        <p>Versão de dev do Gerador de proposta</p>
-    </div>
-
     <div id="status-container" class="mb-4 text-sm font-medium"></div>
 
     <form id="loginFormMFA">
@@ -26,8 +18,15 @@
             <x-text-input id="senha" class="block mt-1 w-full" type="password" name="senha" required autocomplete="current-password" />
         </div>
 
+        <div class="block mt-4">
+            <label for="remember_me" class="inline-flex items-center">
+                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
+                <span class="ms-3 text-sm text-gray-600 dark:text-gray-400">{{ __('Relembre-me') }}</span>
+            </label>
+        </div>
+
         <div class="flex items-center justify-end mt-4">
-            <x-primary-button id="btnSubmitMFA" class="w-full justify-center">
+            <x-primary-button id="btnSubmitMFA" class="ms-3">
                 {{ __('Entrar') }}
             </x-primary-button>
         </div>
@@ -41,11 +40,6 @@
         </div>
     </form>
 
-    <div class="mt-4 text-center">
-        <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('register') }}">
-            {{ __('Registrar minha conta') }}
-        </a>
-    </div>
 
     <script>
         const form = document.getElementById('loginFormMFA');
@@ -54,13 +48,12 @@
         const btnSubmit = document.getElementById('btnSubmitMFA');
         let pollInterval = null;
 
-        // Pegando o token CSRF do meta tag que o Laravel Breeze já coloca no layout
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             statusDiv.innerHTML = '';
-            statusDiv.className = 'mb-4 text-sm font-medium text-gray-600'; // Reset style
+            statusDiv.className = 'mb-4 text-sm font-medium text-gray-600'; 
             spinner.classList.add('hidden');
             btnSubmit.disabled = true;
 
@@ -76,7 +69,6 @@
             statusDiv.innerText = 'Verificando credenciais e enviando Push...';
 
             try {
-                // Chama a rota POST /login do Laravel
                 const resp = await fetch('{{ route("login") }}', {
                     method: 'POST',
                     headers: { 
@@ -95,7 +87,6 @@
                     return;
                 }
 
-                // Sucesso na senha, agora temos o TransactionID
                 if (data.transactionId) {
                     statusDiv.className = 'mb-4 text-sm font-medium text-green-600';
                     statusDiv.innerText = 'Push enviado! Verifique seu app AuthPoint.';
@@ -122,7 +113,7 @@
         function startPolling(transactionId) {
             if (pollInterval) clearInterval(pollInterval);
             let pollCount = 0;
-            const POLL_MAX = 60; // 2 minutos
+            const POLL_MAX = 60; 
             const POLL_DELAY_MS = 2000;
 
             pollInterval = setInterval(async () => {
@@ -136,8 +127,6 @@
                 }
 
                 try {
-                    // Chama a rota de verificação de status (MfaController)
-                    // Nota: A rota no Laravel espera /auth/mfa/status/{id}
                     const url = `/auth/mfa/status/${encodeURIComponent(transactionId)}`;
                     
                     const resp = await fetch(url, {
@@ -156,7 +145,6 @@
                         statusDiv.className = 'mb-4 text-sm font-medium text-green-600';
                         statusDiv.innerText = 'Aprovado! Redirecionando...';
                         
-                        // O MfaController pode retornar para onde redirecionar
                         window.location.href = j.redirect || '/dashboard';
                         return;
                     }
@@ -168,7 +156,6 @@
                         btnSubmit.disabled = false;
                         return;
                     }
-                    // Se for PENDING, continua...
 
                 } catch (e) {
                     console.error(e);

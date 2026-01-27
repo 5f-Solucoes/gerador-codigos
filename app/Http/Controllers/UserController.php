@@ -34,17 +34,17 @@ class UserController extends Controller
     {
         $this->checkAdmin();
 
-        // 1. Validação
+        // Validação
         $request->validate([
             'name'     => 'required|string|max:255',
-            'username' => 'required|string|max:100|unique:users', // Username obrigatório (Login WatchGuard)
+            'username' => 'required|string|max:100|unique:users', 
             'email'    => 'required|string|email|max:255|unique:users',
             'celular'  => 'required|string|max:20',
             'perfil'   => 'required|in:VENDEDOR,GERENTE,ADMIN',
             'status'   => 'required|in:ATIVO,INATIVO',
         ]);
 
-        // 2. Gerar Sigla (Primeira letra de cada nome)
+        // Gerar Sigla 
         $sigla = '';
         $parts = explode(' ', trim($request->name));
         foreach ($parts as $p) {
@@ -52,16 +52,15 @@ class UserController extends Controller
         }
         $sigla = substr($sigla, 0, 5);
 
-        // 3. Criar Usuário
+        // Criar Usuário
         User::create([
             'name'     => $request->name,
-            'username' => $request->username, // Salva o login do WatchGuard
+            'username' => $request->username, 
             'email'    => $request->email,
             'celular'  => $request->celular,
             'perfil'   => $request->perfil,
             'status'   => $request->status,
             'sigla'    => $sigla,
-            // Como a auth é externa, salvamos uma senha padrão interna inútil apenas para satisfazer o DB
             'password' => Hash::make('auth_watchguard_externa'), 
         ]);
 

@@ -1,4 +1,7 @@
 <x-app-layout>
+    <x-slot name="title">
+        Área Administrativa
+    </x-slot>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Área Administrativa') }}
@@ -75,7 +78,7 @@
                            class="w-64 py-2 px-4 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white placeholder-gray-500" 
                            placeholder="Pesquisar cliente...">
 
-                    <a href="{{ route('clientes.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 transition ease-in-out duration-150 h-[38px]">
+                    <a href="{{ route('clientes.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-full font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 transition ease-in-out duration-150 h-[38px]">
                         + Novo Cliente
                     </a>
                 </div>
@@ -149,7 +152,7 @@
                            class="w-64 py-2 px-4 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-purple-500 focus:border-purple-500 text-gray-900 dark:text-white placeholder-gray-500" 
                            placeholder="Pesquisar parceiro...">
 
-                    <a href="{{ route('parceiros.create') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 transition ease-in-out duration-150 h-[38px]">
+                    <a href="{{ route('parceiros.create') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-full font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 transition ease-in-out duration-150 h-[38px]">
                         + Novo Parceiro
                     </a>
                 </div>
@@ -196,7 +199,7 @@
                            class="w-64 py-2 px-4 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-red-500 focus:border-red-500 text-gray-900 dark:text-white placeholder-gray-500" 
                            placeholder="Pesquisar produto...">
 
-                    <a href="{{ route('produtos.create') }}" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 transition ease-in-out duration-150 h-[38px]">
+                    <a href="{{ route('produtos.create') }}" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-full font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 transition ease-in-out duration-150 h-[38px]">
                         + Novo Produto
                     </a>
                 </div>
@@ -311,19 +314,7 @@
                                 Baixar Tudo (.csv)
                             </a>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-600 p-6">
-                            <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Resumo Rápido</h4>
-                            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                                <li class="flex justify-between">
-                                    <span>Total de Códigos:</span>
-                                    <span class="font-bold">{{ \App\Models\CodigoDeProposta::count() }}</span>
-                                </li>
-                                <li class="flex justify-between">
-                                    <span>Hoje:</span>
-                                    <span class="font-bold text-green-600">{{ \App\Models\CodigoDeProposta::whereDate('created_at', now())->count() }}</span>
-                                </li>
-                            </ul>
-                        </div>
+                        
                     </div>
                 </div>
             </div>
