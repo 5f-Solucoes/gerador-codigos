@@ -11,9 +11,7 @@ use Illuminate\Validation\Rule;
 
 class ClienteController extends Controller
 {
-    // Regra de segurança: Só admin/gerente/vendedor acessa
     public function __construct() {
-        // Você pode ajustar o middleware aqui ou nas rotas
     }
 
     public function create()

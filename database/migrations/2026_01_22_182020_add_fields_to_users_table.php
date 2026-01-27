@@ -17,7 +17,6 @@ return new class extends Migration
         $table->string('celular', 20)->nullable();
         $table->enum('perfil', ['VENDEDOR', 'GERENTE', 'ADMIN'])->default('VENDEDOR');
         $table->enum('status', ['INATIVO', 'ATIVO'])->default('INATIVO');
-        // Campos legados de controle (opcional manter)
         $table->boolean('must_change_password')->default(true);
     });
 }

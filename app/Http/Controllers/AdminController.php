@@ -22,11 +22,9 @@ class AdminController extends Controller
         $parceiros = Parceiro::orderBy('nome')->get();
         $produtos = Produto::with('parceiro')->orderBy('nome')->get();
         
-        // --- ADICIONE ESTA LINHA ---
         // Busca os usuários para preencher o select de filtro
         $users = \App\Models\User::orderBy('name')->get();
 
-        // --- ATUALIZE O COMPACT ---
         // Adicione 'users' dentro do compact()
         return view('admin.index', compact('clientes', 'parceiros', 'produtos', 'users'));
     }
@@ -43,24 +41,23 @@ class AdminController extends Controller
         $query = CodigoDeProposta::with(['user', 'cliente', 'parceiro', 'produto'])
                     ->orderBy('data', 'desc');
 
-        // --- APLICAÇÃO DOS FILTROS ---
         
-        // 1. Filtro por Usuário/Vendedor
+        // Filtro por Usuário/Vendedor
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);
         }
 
-        // 2. Filtro por Cliente
+        // Filtro por Cliente
         if ($request->filled('cliente_id')) {
             $query->where('cliente_id', $request->cliente_id);
         }
 
-        // 3. Filtro por Parceiro (Fabricante)
+        // Filtro por Parceiro (Fabricante)
         if ($request->filled('parceiro_id')) {
             $query->where('parceiro_id', $request->parceiro_id);
         }
 
-        // 4. Filtro por Data (Opcional, mas muito útil em relatórios)
+        // Filtro por Data (Opcional, mas muito útil em relatórios)
         if ($request->filled('data_inicio')) {
             $query->whereDate('data', '>=', $request->data_inicio);
         }
@@ -71,7 +68,6 @@ class AdminController extends Controller
         // Executa a query com os filtros aplicados
         $codigos = $query->get();
 
-        // (O restante do código de geração do CSV permanece idêntico)
         $headers = [
             "Content-type"        => "text/csv",
             "Content-Disposition" => "attachment; filename=$fileName",
@@ -89,7 +85,7 @@ class AdminController extends Controller
             foreach ($codigos as $c) {
                 fputcsv($file, [
                     $c->id,
-                    \Carbon\Carbon::parse($c->data)->format('d/m/Y'), // Formatação PT-BR
+                    \Carbon\Carbon::parse($c->data)->format('d/m/Y'), 
                     $c->codigo_proposta,
                     $c->descricao,
                     $c->user ? $c->user->name : 'N/D',

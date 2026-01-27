@@ -1,4 +1,7 @@
 <x-app-layout>
+    <x-slot name="title">
+        Dashboard
+    </x-slot>
     <div x-data="{
         showToast: false,
         toastMessage: '',

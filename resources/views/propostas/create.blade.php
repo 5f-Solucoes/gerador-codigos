@@ -1,4 +1,7 @@
 <x-app-layout>
+    <x-slot name="title">
+        Cadastrar Novo Código
+    </x-slot>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Cadastrar Novo Código') }}
@@ -173,19 +176,19 @@
                 },
 
                 gerarPreview() {
-                    // 1. Gera o Prefixo de Data (Visual)
+                   //Gera o Prefixo de Data 
                     const hoje = new Date();
                     const ano = hoje.getFullYear().toString().slice(-2);
                     const mes = String(hoje.getMonth() + 1).padStart(2, '0');
                     const dia = String(hoje.getDate()).padStart(2, '0');
-                    const prefixoBase = `5F${ano}${mes}${dia}Xv1`; // X representa a sequência
+                    const prefixoBase = `5F${ano}${mes}${dia}Xv1`; 
 
-                    // 2. Helpers de limpeza (Igual ao Controller)
+                    //Helpers de limpeza
                     const clean = (str) => (str || '').toString().replace(/\s+/g, '').toUpperCase();
                     const cleanDesc = (str) => (str || '').toString().trim().toUpperCase().replace(/\s+/g, '_');
                     const cleanFilial = (str) => (str || '').toString().toUpperCase().replace(/\s+/g, '_');
 
-                    // 3. Captura os textos
+                    //Captura os textos
                     const vSig = clean(this.form.vendedorSigla);
                     
                     const cliObj = this.data.clientes.find(c => c.id == this.form.clienteId);
@@ -193,10 +196,7 @@
 
                     const filial = cleanFilial(this.form.filial);
                     
-                    // Pegar texto do select (recorrendo ao DOM para pegar o texto visível do option, não o ID)
-                    // Nota: O Alpine puro reativo é melhor, vamos buscar no array data:
-                    const parcObj = this.data.parceirosDB?.find(p => p.id == this.form.parceiroId); // Precisamos passar parceirosDB no init se quisermos puro
-                    // Fallback DOM para simplicidade já que os arrays estão filtrados:
+                    const parcObj = this.data.parceirosDB?.find(p => p.id == this.form.parceiroId); 
                     const parTextElem = document.getElementById('parceiro_id');
                     const prodTextElem = document.getElementById('produto_id');
                     
@@ -207,8 +207,7 @@
                     const prodClean = clean(prodText);
                     const desc = cleanDesc(this.form.descricao);
 
-                    // 4. Montagem Final
-                    // Ex: -SIGLA-CLIENTE-FILIAL-PARCEIRO_PRODUTO
+                    // Montagem Final
                     const parts = [vSig, cliText, filial];
                     
                     let suffix = parts.filter(p => p !== '').join('-');

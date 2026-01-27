@@ -21,7 +21,7 @@ class WatchGuardService
 
     public function __construct()
     {
-        // Carrega as configurações do config/services.php
+        // Carrega as configurações
         $this->accessId = config('services.watchguard.access_id');
         $this->clientSecret = config('services.watchguard.client_secret');
         $this->authUrl = config('services.watchguard.auth_url');
@@ -30,10 +30,6 @@ class WatchGuardService
         $this->accountId = config('services.watchguard.account_id');
         $this->resourceId = config('services.watchguard.resource_id');
     }
-
-    /**
-     * Inicia a transação de PUSH (Antigo authenticate_wg.php)
-     */
     public function iniciarTransacaoPush(User $user, string $password)
     {
         $endpoint = "/accounts/{$this->accountId}/resources/{$this->resourceId}/transactions";
@@ -57,7 +53,7 @@ class WatchGuardService
                 ];
             }
 
-            // Sincroniza senha local se necessário (Feature do seu código antigo)
+            // Sincroniza senha local se necessário 
             if (!Hash::check($password, $user->password)) {
                 $user->password = Hash::make($password);
                 $user->save();
@@ -79,19 +75,12 @@ class WatchGuardService
         }
     }
 
-    /**
-     * Obtém o Token de Acesso com Cache Automático (Antigo get_wg_token)
-     */
     protected function getToken()
     {
-        // Cache::remember faz a mágica:
-        // 1. Procura a chave 'wg_access_token'.
-        // 2. Se achar, retorna ela.
-        // 3. Se NÃO achar, executa a função, pega o token novo, salva no cache por 3500 segundos e retorna.
         return Cache::remember('wg_access_token', 3500, function () {
             
             $response = Http::withBasicAuth($this->accessId, $this->clientSecret)
-                ->asForm() // 'grant_type=client_credentials...'
+                ->asForm() 
                 ->withUserAgent('Dev.5F.AuthPointClient/1.0')
                 ->post($this->authUrl, [
                     'grant_type' => 'client_credentials',
@@ -107,9 +96,6 @@ class WatchGuardService
         });
     }
 
-    /**
-     * Realiza a chamada HTTP para a API (Antigo wg_api_call)
-     */
     protected function callApi($method, $path, $body = null)
     {
         $token = $this->getToken();
@@ -127,7 +113,6 @@ class WatchGuardService
             ])
             ->timeout(15);
 
-        // Executa (GET, POST, etc)
         if (strtoupper($method) === 'POST') {
             $response = $request->post($url, $body);
         } elseif (strtoupper($method) === 'GET') {
@@ -151,7 +136,7 @@ class WatchGuardService
         try {
             $response = $this->callApi('GET', $endpoint);
 
-            // Se for 202 (Accepted), ainda está processando
+            // Se for 202 
             if ($response['status'] == 202) {
                 return 'PENDING';
             }
@@ -164,7 +149,6 @@ class WatchGuardService
 
             $body = $response['body'] ?? [];
 
-            // Lógica de normalização de status (Cópia fiel do seu código legado)
             $statusCandidates = [];
             if (isset($body['status'])) $statusCandidates[] = $body['status'];
             if (isset($body['pushResult'])) $statusCandidates[] = $body['pushResult'];
@@ -187,7 +171,7 @@ class WatchGuardService
 
             $resultNorm = strtoupper(trim($resultStatus));
 
-            // Mapeia para status simplificado
+            // Mapeia status 
             if (in_array($resultNorm, ['AUTHORIZED', 'AUTHORISED', 'SUCCESS', 'OK'])) {
                 return 'AUTHORIZED';
             }

@@ -1,4 +1,7 @@
 <x-app-layout>
+    <x-slot name="title">
+        Editar Código
+    </x-slot>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Editar Código') }} <span class="text-gray-500 text-sm ml-2">#{{ $proposta->id }}</span>
@@ -129,8 +132,8 @@
 
                 init() {
                     // Carrega listas iniciais baseadas no banco
-                    this.onClienteChange(true); // true = não limpa a filial atual
-                    this.onParceiroChange(true); // true = não limpa o produto atual
+                    this.onClienteChange(true); 
+                    this.onParceiroChange(true); 
                 },
 
                 onClienteChange(isInit = false) {
@@ -139,7 +142,7 @@
                     
                     if (!this.form.clienteId) return;
 
-                    // Lógica de Filiais (Banco + Site)
+                    // Lógica de Filiais 
                     const filiaisDoBanco = this.data.filiaisDB
                         .filter(f => f.cliente_id == this.form.clienteId)
                         .map(f => f.localidade);
@@ -153,11 +156,9 @@
                     }
                     this.filteredFiliais = filiaisDoBanco;
 
-                    // Se só tem uma opção e não estamos inicializando, seleciona ela auto
                     if (!isInit && this.filteredFiliais.length === 1) {
                         this.form.filial = this.filteredFiliais[0];
                     }
-                    // Fallback para inicialização se a filial salva não estiver na lista (ex: foi editada no banco)
                     if (isInit && this.form.filial && !this.filteredFiliais.includes(this.form.filial)) {
                         this.filteredFiliais.push(this.form.filial);
                     }

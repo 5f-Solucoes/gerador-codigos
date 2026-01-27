@@ -14,26 +14,24 @@ class ProdutoController extends Controller
     public function create()
     {
         $parceiros = Parceiro::orderBy('nome')->get();
-        // Traz produtos para a visualização lateral (agrupados por parceiro)
         $produtos = Produto::all(); 
         return view('produtos.create', compact('parceiros', 'produtos'));
     }
 
     public function store(Request $request)
     {
-        // 1. Sanitização
+        // Sanitização
         $input = $request->all();
         $input['nome'] = strtoupper(trim($request->input('nome')));
         $input['sigla'] = strtoupper(trim($request->input('sigla')));
         $request->merge($input);
 
-        // 2. Validação
+        // Validação
         $request->validate([
             'parceiro_id' => 'required|exists:parceiros,id',
             'nome' => [
                 'required',
                 'regex:/^\S*$/u',
-                // Garante nome único para o MESMO parceiro
                 Rule::unique('produtos')->where(function ($query) use ($request) {
                     return $query->where('parceiro_id', $request->parceiro_id);
                 }),
@@ -44,7 +42,7 @@ class ProdutoController extends Controller
             'nome.unique' => 'Produto já cadastrado para este parceiro.',
         ]);
 
-        // 3. Salvar
+        // Salvar
         Produto::create($input);
 
         return redirect()->route('admin.index', ['tab' => 'produtos'])
@@ -72,7 +70,6 @@ class ProdutoController extends Controller
             'nome' => [
                 'required',
                 'regex:/^\S*$/u',
-                // Valida unicidade ignorando o próprio registro
                 Rule::unique('produtos')->where(function ($query) use ($request) {
                     return $query->where('parceiro_id', $request->parceiro_id);
                 })->ignore($produto->id),
@@ -92,7 +89,6 @@ class ProdutoController extends Controller
             abort(403, 'Apenas administradores podem excluir produtos.');
         }
 
-        // REGRA DE SEGURANÇA: Verificar uso em códigos
         $uso = CodigoDeProposta::where('produto_id', $id)->count();
 
         if ($uso > 0) {

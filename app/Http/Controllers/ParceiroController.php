@@ -18,22 +18,22 @@ class ParceiroController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Sanitização
+        // Sanitização
         $input = $request->all();
         $input['nome'] = strtoupper(trim($request->input('nome')));
-        $input['sigla'] = strtoupper(trim($request->input('sigla'))); // <--- ADICIONADO
+        $input['sigla'] = strtoupper(trim($request->input('sigla'))); 
         $request->merge($input);
 
-        // 2. Validação
+        // Validação
         $request->validate([
             'nome' => 'required|string|unique:parceiros,nome',
-            'sigla' => 'nullable|string|max:10', // <--- ADICIONADO (Ajuste o max se precisar)
+            'sigla' => 'nullable|string|max:10', 
         ], [
             'nome.unique' => 'Já existe um parceiro com este nome.',
             'nome.required' => 'O nome do parceiro é obrigatório.',
         ]);
 
-        // 3. Salvar
+        // Salvar
         Parceiro::create($input);
 
         return redirect()->route('admin.index', ['tab' => 'parceiros'])
@@ -52,7 +52,7 @@ class ParceiroController extends Controller
 
         $input = $request->all();
         $input['nome'] = strtoupper(trim($request->input('nome')));
-        $input['sigla'] = strtoupper(trim($request->input('sigla'))); // <--- ADICIONADO
+        $input['sigla'] = strtoupper(trim($request->input('sigla'))); 
         $request->merge($input);
 
         $request->validate([
@@ -61,7 +61,7 @@ class ParceiroController extends Controller
                 'string',
                 Rule::unique('parceiros', 'nome')->ignore($parceiro->id),
             ],
-            'sigla' => 'nullable|string|max:10', // <--- ADICIONADO
+            'sigla' => 'nullable|string|max:10', 
         ]);
 
         $parceiro->update($input);
@@ -75,16 +75,14 @@ class ParceiroController extends Controller
         if (Auth::user()->perfil !== 'ADMIN') {
             abort(403, 'Apenas administradores podem excluir parceiros.');
         }
-
-        // REGRA DE SEGURANÇA: Verificar dependências
         
-        // 1. Verifica se tem produtos cadastrados
+        // Verifica se tem produtos cadastrados
         $produtosQtd = Produto::where('parceiro_id', $id)->count();
         if ($produtosQtd > 0) {
             return redirect()->back()->with('error', "Não é possível excluir: Este parceiro possui $produtosQtd produtos cadastrados.");
         }
 
-        // 2. Verifica se tem códigos gerados
+        // Verifica se tem códigos gerados
         $codigosQtd = CodigoDeProposta::where('parceiro_id', $id)->count();
         if ($codigosQtd > 0) {
             return redirect()->back()->with('error', "Não é possível excluir: Existem $codigosQtd códigos de proposta vinculados a este parceiro.");
