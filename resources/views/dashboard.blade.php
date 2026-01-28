@@ -3,17 +3,52 @@
         Dashboard
     </x-slot>
     <div x-data="{
-        showToast: false,
-        toastMessage: '',
-        copyToClipboard(text) {
-            if (!text) return;
+    showToast: false,
+    toastMessage: '',
+    copyToClipboard(text) {
+        if (!text) return;
+
+        // Tenta o método moderno (só funciona em HTTPS ou localhost)
+        if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(text).then(() => {
-                this.toastMessage = 'Código copiado!';
-                this.showToast = true;
-                setTimeout(() => this.showToast = false, 3000);
-            }).catch(err => { console.error(err); });
+                this.triggerToast();
+            }).catch(err => {
+                this.fallbackCopy(text);
+            });
+        } else {
+            // Usa o método antigo (funciona no seu IP 10.1.x.x)
+            this.fallbackCopy(text);
         }
-    }">
+    },
+    fallbackCopy(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        
+        // Garante que o elemento não seja visível na tela
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '0';
+        
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            this.triggerToast();
+        } catch (err) {
+            console.error('Erro ao copiar', err);
+            alert('Não foi possível copiar automaticamente.');
+        }
+
+        document.body.removeChild(textArea);
+    },
+    triggerToast() {
+        this.toastMessage = 'Código copiado!';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+    }
+}">
 
     <x-slot name="header">
         <div class="flex justify-between items-center h-10">
