@@ -72,78 +72,85 @@
             </div>
 
             <div x-show="tab === 'clientes'" x-transition.opacity.duration.300ms>
-                
-                <div class="flex justify-end items-center mb-4 gap-2">
-                    <input type="text" x-model="searchCli" 
-                           class="w-64 py-2 px-4 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white placeholder-gray-500" 
-                           placeholder="Pesquisar cliente...">
+    
+    <div class="flex justify-end items-center mb-4 gap-2">
+        <input type="text" x-model="searchCli" 
+               class="w-64 py-2 px-4 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white placeholder-gray-500" 
+               placeholder="Pesquisar cliente...">
 
-                    <a href="{{ route('clientes.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-full font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 transition ease-in-out duration-150 h-[38px]">
-                        + Novo Cliente
-                    </a>
-                </div>
-                
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/4">Nome Fantasia</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/5">CNPJs</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Localidades / Site</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($clientes as $c)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                                x-show="$el.textContent.toLowerCase().includes(searchCli.toLowerCase())">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $c->nome_fantasia }}</div>
-                                    <div class="text-xs text-gray-500">{{ $c->razao_social }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                    @if($c->filiais->count() > 0)
-                                        @foreach($c->filiais as $f)
-                                            <div class="text-xs font-mono block mb-1">{{ $f->cnpj }} <span class="text-gray-400">({{ $f->localidade }})</span></div>
-                                        @endforeach
-                                    @else
-                                        <span class="text-red-400 text-xs">Sem CNPJ</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                                    @if($c->filiais->count() > 0)
-                                        <div class="flex flex-wrap gap-1">
-                                            @foreach($c->filiais as $f)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                                    {{ $f->localidade }}
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <a href="{{ $c->site }}" target="_blank" class="text-indigo-600 hover:underline">{{ $c->site ?? 'N/A' }}</a>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="{{ route('clientes.edit', $c->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
-                                    @if(Auth::user()->perfil === 'ADMIN')
-                                    <form action="{{ route('clientes.destroy', $c->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir o cliente {{ $c->nome_fantasia }}?');" class="inline-block">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900 font-bold text-xs">Excluir</button>
-                                    </form>
-                                    @endif
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="4" class="px-6 py-10 text-center text-gray-500">
-                                    Nenhum cliente cadastrado ainda.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <a href="{{ route('clientes.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-full font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 transition ease-in-out duration-150 h-[38px]">
+            + Novo Cliente
+        </a>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-x-auto border border-gray-200 dark:border-gray-700">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/4">Nome Fantasia</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/5">CNPJs</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Localidades / Site</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                @forelse($clientes as $c)
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                    x-show="$el.textContent.toLowerCase().includes(searchCli.toLowerCase())">
+                    
+                    <td class="px-6 py-4 align-top">
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $c->nome_fantasia }}</div>
+                        <div class="text-xs text-gray-500">{{ $c->razao_social }}</div>
+                    </td>
+
+                    <td class="px-6 py-4 align-top text-sm text-gray-500 dark:text-gray-300">
+                        @if($c->filiais->count() > 0)
+                            @foreach($c->filiais as $f)
+                                <div class="text-xs font-mono block mb-1">
+                                    {{ $f->cnpj }} 
+                                    <span class="text-gray-400">({{ $f->localidade }})</span>
+                                </div>
+                            @endforeach
+                        @else
+                            <span class="text-red-400 text-xs">Sem CNPJ</span>
+                        @endif
+                    </td>
+
+                    <td class="px-6 py-4 align-top text-sm text-gray-500 dark:text-gray-300">
+                        @if($c->filiais->count() > 0)
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($c->filiais as $f)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                        {{ $f->localidade }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        @else
+                            <a href="{{ $c->site }}" target="_blank" class="text-indigo-600 hover:underline break-all">{{ $c->site ?? 'N/A' }}</a>
+                        @endif
+                    </td>
+
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium align-top">
+                        <a href="{{ route('clientes.edit', $c->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
+                        @if(Auth::user()->perfil === 'ADMIN')
+                        <form action="{{ route('clientes.destroy', $c->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir o cliente {{ $c->nome_fantasia }}?');" class="inline-block">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="text-red-600 hover:text-red-900 font-bold text-xs">Excluir</button>
+                        </form>
+                        @endif
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="4" class="px-6 py-10 text-center text-gray-500">
+                        Nenhum cliente cadastrado ainda.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 
             <div x-show="tab === 'parceiros'" x-transition.opacity.duration.300ms style="display: none;">
                 

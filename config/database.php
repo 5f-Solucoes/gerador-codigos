@@ -56,12 +56,28 @@ return [
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => true,
+            'strict' => null,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
+
+        /*
+        'legacy' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_LEGACY', '127.0.0.1'),
+            'port' => env('DB_PORT_LEGACY', '3306'),
+            'database' => env('DB_DATABASE_LEGACY', 'forge'), 
+            'username' => env('DB_USERNAME_LEGACY', 'forge'),
+            'password' => env('DB_PASSWORD_LEGACY', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+        */
 
         'mariadb' => [
             'driver' => 'mariadb',

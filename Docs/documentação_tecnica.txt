@@ -1,0 +1,142 @@
+================================================================================
+DOCUMENTAÇÃO TÉCNICA - GERADOR DE CÓDIGOS
+================================================================================
+
+1. VISÃO GERAL
+================================================================================
+O Gerador de Códigos é uma aplicação desenvolvida para automatizar a geração
+de códigos e sequências alfanuméricas com diferentes padrões e configurações.
+
+Versão: 1.0.0
+Linguagem Principal: JavaScript/TypeScript
+Framework: Node.js / Express
+Banco de Dados: MySQL/PostgreSQL
+Status: Em Desenvolvimento (branch: develop)
+
+
+2. ARQUITETURA DO PROJETO
+================================================================================
+O projeto segue uma arquitetura modular com as seguintes camadas:
+
+├── /src
+│   ├── controllers/       - Lógica de negócio e manipulação de requisições
+│   ├── models/           - Modelos de dados e banco de dados
+│   ├── routes/           - Definição de rotas da API
+│   ├── services/         - Serviços reutilizáveis
+│   ├── utils/            - Funções utilitárias
+│   └── middleware/       - Middlewares customizados
+├── /tests               - Testes unitários e integração
+├── /docs                - Documentação
+└── /config              - Arquivos de configuração
+
+
+3. DEPENDÊNCIAS PRINCIPAIS
+================================================================================
+- express: Framework web
+- dotenv: Gerenciamento de variáveis de ambiente
+- mysql2/pg: Conexão com banco de dados
+- joi: Validação de schemas
+- bcrypt: Hash de senhas
+- jsonwebtoken: Autenticação JWT
+- cors: Controle de CORS
+
+
+4. CONFIGURAÇÃO DO AMBIENTE
+================================================================================
+Variáveis de Ambiente Necessárias:
+
+NODE_ENV=development
+PORT=3000
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=password
+DB_NAME=gerador_codigos
+JWT_SECRET=your_secret_key
+API_URL=http://localhost:3000
+
+
+5. ENDPOINTS PRINCIPAIS
+================================================================================
+
+GET /api/codigos
+- Descrição: Listar todos os códigos gerados
+- Autenticação: JWT
+- Response: { codigos: [], total: number }
+
+POST /api/codigos/gerar
+- Descrição: Gerar novo código
+- Autenticação: JWT
+- Body: { tipo: string, quantidade: number, prefixo?: string }
+- Response: { codigo: string, dataGeracao: date }
+
+GET /api/codigos/:id
+- Descrição: Obter detalhes de um código específico
+- Autenticação: JWT
+
+DELETE /api/codigos/:id
+- Descrição: Deletar um código
+- Autenticação: JWT
+
+
+6. FLUXO DE AUTENTICAÇÃO
+================================================================================
+1. Usuário realiza login com credentials (POST /auth/login)
+2. Servidor retorna JWT token
+3. Cliente armazena token no localStorage
+4. Token é enviado no header Authorization: Bearer <token>
+5. Middleware valida token em cada requisição protegida
+
+
+7. PADRÕES DE CÓDIGO
+================================================================================
+- Nomenclatura: camelCase para variáveis, PascalCase para classes
+- Indentação: 2 espaços
+- Tratamento de Erros: Try/catch com logs estruturados
+- Commits: Seguir Conventional Commits (feat:, fix:, docs:, etc.)
+
+
+8. TESTES
+================================================================================
+Executar testes: npm test
+Cobertura: npm run test:coverage
+Testes são localizados em /tests e usam Jest como framework
+
+
+9. DEPLOYMENT
+================================================================================
+Develop (Staging): Deploy automático via CI/CD
+Main (Production): Deploy manual com aprovação
+
+Scripts disponíveis:
+- npm start: Iniciar servidor
+- npm run dev: Iniciar com nodemon (desenvolvimento)
+- npm run build: Build para produção
+- npm test: Executar testes
+
+
+10. TROUBLESHOOTING
+================================================================================
+Erro: "Database connection failed"
+- Verificar credenciais em .env
+- Confirmar se MySQL/PostgreSQL está rodando
+- Verificar firewall
+
+Erro: "JWT token invalid"
+- Fazer novo login
+- Verificar JWT_SECRET em .env
+
+Erro: "CORS error"
+- Adicionar origem em whitelist no middleware CORS
+
+
+11. CONTATO E SUPORTE
+================================================================================
+Repositório: 5f-Solucoes/gerador-codigos
+Branch Atual: develop
+Branch Principal: main
+Documentação Completa: /Docs
+
+================================================================================
+Última Atualização: 2024
+================================================================================
