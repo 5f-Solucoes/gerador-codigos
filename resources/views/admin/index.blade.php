@@ -132,7 +132,7 @@
 
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium align-top">
                         <a href="{{ route('clientes.edit', $c->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
-                        @if(Auth::user()->perfil === 'ADMIN')
+                        @if(Auth::user()->perfil === 'ADMIN' || Auth::user()->perfil === 'GERENTE')
                         <form action="{{ route('clientes.destroy', $c->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir o cliente {{ $c->nome_fantasia }}?');" class="inline-block">
                             @csrf @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-900 font-bold text-xs">Excluir</button>
@@ -183,7 +183,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $p->sigla ?? '-' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('parceiros.edit', $p->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3 font-bold text-xs">Editar</a>
-                                    @if(Auth::user()->perfil === 'ADMIN')
+                                    @if(Auth::user()->perfil === 'ADMIN' || Auth::user()->perfil === 'GERENTE')
                                         <form action="{{ route('parceiros.destroy', $p->id) }}" method="POST" onsubmit="return confirm('Tem certeza?');" class="inline-block">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900 font-bold text-xs">Excluir</button>
@@ -234,7 +234,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $prod->sigla }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('produtos.edit', $prod->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3 font-bold text-xs">Editar</a>
-                                    @if(Auth::user()->perfil === 'ADMIN')
+                                    @if(Auth::user()->perfil === 'ADMIN' || Auth::user()->perfil === 'GERENTE')
                                         <form action="{{ route('produtos.destroy', $prod->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir o produto {{ $prod->nome }}?');" class="inline-block">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900 font-bold text-xs">Excluir</button>

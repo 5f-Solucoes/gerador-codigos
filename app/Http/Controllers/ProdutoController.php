@@ -22,8 +22,8 @@ class ProdutoController extends Controller
     {
         // Sanitização
         $input = $request->all();
-        $input['nome'] = strtoupper(trim($request->input('nome')));
-        $input['sigla'] = strtoupper(trim($request->input('sigla')));
+        $input['nome'] = mb_strtoupper(trim($request->input('nome')));
+        $input['sigla'] = mb_strtoupper(trim($request->input('sigla')));
         $request->merge($input);
 
         // Validação
@@ -61,8 +61,8 @@ class ProdutoController extends Controller
         $produto = Produto::findOrFail($id);
 
         $input = $request->all();
-        $input['nome'] = strtoupper(trim($request->input('nome')));
-        $input['sigla'] = strtoupper(trim($request->input('sigla')));
+        $input['nome'] = mb_strtoupper(trim($request->input('nome')));
+        $input['sigla'] = mb_strtoupper(trim($request->input('sigla')));
         $request->merge($input);
 
         $request->validate([
@@ -85,8 +85,8 @@ class ProdutoController extends Controller
 
     public function destroy($id)
     {
-        if (Auth::user()->perfil !== 'ADMIN') {
-            abort(403, 'Apenas administradores podem excluir produtos.');
+        if (Auth::user()->perfil !== 'ADMIN' && Auth::user()->perfil !== 'GERENTE') {
+            abort(403, 'Apenas administradores e gerente podem excluir produtos.');
         }
 
         $uso = CodigoDeProposta::where('produto_id', $id)->count();
