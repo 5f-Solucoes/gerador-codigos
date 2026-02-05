@@ -23,17 +23,17 @@ class ClienteController extends Controller
     {
         // 1. Sanitização básica (ToUpper)
         $input = $request->all();
-        $input['nome_fantasia'] = strtoupper(trim($request->input('nome_fantasia')));
-        $input['razao_social'] = strtoupper(trim($request->input('razao_social')));
-        $request->merge($input); // Atualiza o request com os dados sanitizados
+        $input['nome_fantasia'] = mb_strtoupper(trim($request->input('nome_fantasia')));
+        $input['razao_social'] = mb_strtoupper(trim($request->input('razao_social')));
+        $request->merge($input); 
 
-        // 2. Validação
+        // Validação
         $request->validate([
             'nome_fantasia' => [
                 'required',
                 'string',
-                'regex:/^\S*$/u', // Regex: Não permite espaços
-                'unique:clientes,nome_fantasia' // Único na tabela clientes
+                'regex:/^\S*$/u', 
+                'unique:clientes,nome_fantasia' 
             ],
             'filiais' => 'required|array|min:1',
             'filiais.*.cnpj' => 'required|distinct',
@@ -46,16 +46,13 @@ class ClienteController extends Controller
             'filiais.*.localidade.required' => 'A localidade é obrigatória em todas as linhas.',
         ]);
 
-        // 3. Criação do Cliente
+        // Criação do Cliente
         $cliente = new Cliente();
         $cliente->nome_fantasia = $request->nome_fantasia;
         $cliente->razao_social = $request->razao_social;
-        // Campos legados (se existirem na tabela, senão remova)
-        // $cliente->data_cadastro = now(); 
-        // $cliente->cadastrado_por = Auth::id();
         $cliente->save();
 
-        // 4. Criação das Filiais
+        // Criação das Filiais
         foreach ($request->filiais as $f) {
             $cliente->filiais()->create([
                 'cnpj' => strtoupper(trim($f['cnpj'])),
@@ -75,12 +72,12 @@ class ClienteController extends Controller
 
     public function update(Request $request, $id)
     {
-        $cliente = Cliente::findOrFail($id); // Isso usa 'id' automaticamente
+        $cliente = Cliente::findOrFail($id); 
 
         // Sanitização
         $input = $request->all();
-        $input['nome_fantasia'] = strtoupper(trim($request->input('nome_fantasia')));
-        $input['razao_social'] = strtoupper(trim($request->input('razao_social')));
+        $input['nome_fantasia'] = mb_strtoupper(trim($request->input('nome_fantasia')));
+        $input['razao_social'] = mb_strtoupper(trim($request->input('razao_social')));
         $request->merge($input);
 
         // Validação
@@ -88,7 +85,6 @@ class ClienteController extends Controller
             'nome_fantasia' => [
                 'required',
                 'regex:/^\S*$/u',
-                // CORREÇÃO: Apenas ignore($cliente->id). O Laravel sabe que a coluna é 'id'.
                 Rule::unique('clientes', 'nome_fantasia')->ignore($cliente->id),
             ],
             'filiais' => 'required|array|min:1',
@@ -104,8 +100,6 @@ class ClienteController extends Controller
             'razao_social' => $request->razao_social,
         ]);
 
-        // Atualiza Filiais (Estratégia: Apagar tudo e recriar, igual ao legado)
-        // Isso é mais simples para lidar com CNPJs que mudaram ou foram removidos
         $cliente->filiais()->delete();
 
         foreach ($request->filiais as $f) {
@@ -121,7 +115,9 @@ class ClienteController extends Controller
 
     public function destroy($id)
     {
-        if (Auth::user()->perfil !== 'ADMIN') {
+
+
+        if (Auth::user()->perfil !== 'ADMIN' && Auth::user()->perfil !== 'GERENTE') {
             abort(403);
         }
 
@@ -129,7 +125,6 @@ class ClienteController extends Controller
         $uso = CodigoDeProposta::where('cliente_id', $id)->count();
 
         if ($uso > 0) {
-            // REDIRECIONA COM MENSAGEM DE ERRO
             return redirect()->back()
                 ->with('error', "Não é possível excluir: Este cliente possui $uso códigos gerados. Exclua os códigos primeiro.");
         }

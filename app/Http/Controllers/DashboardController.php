@@ -168,10 +168,10 @@ class DashboardController extends Controller
         $produto = \App\Models\Produto::find($request->produto_id);
         
         $limpar = function($str) {
-            return strtoupper(str_replace(' ', '', $str));
+            return mb_strtoupper(str_replace(' ', '', $str));
         };
         $limparDesc = function($str) {
-            return strtoupper(str_replace(' ', '_', trim($str)));
+            return mb_strtoupper(str_replace(' ', '_', trim($str)));
         };
 
         $hoje = now();
@@ -186,7 +186,7 @@ class DashboardController extends Controller
         
         $sigla = $limpar($request->vendedor_sigla);
         $nomeCliente = $limpar($cliente->nome_fantasia);
-        $nomeFilial = strtoupper(str_replace(' ', '_', $request->filial)); 
+        $nomeFilial = mb_strtoupper(str_replace(' ', '_', $request->filial)); 
         
         $nomeParceiro = $limpar($parceiro->nome);
         $nomeProduto = $limpar($produto->nome);

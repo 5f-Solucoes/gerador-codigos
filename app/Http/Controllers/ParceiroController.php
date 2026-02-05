@@ -20,8 +20,8 @@ class ParceiroController extends Controller
     {
         // Sanitização
         $input = $request->all();
-        $input['nome'] = strtoupper(trim($request->input('nome')));
-        $input['sigla'] = strtoupper(trim($request->input('sigla'))); 
+        $input['nome'] = mb_strtoupper(trim($request->input('nome')));
+        $input['sigla'] = mb_strtoupper(trim($request->input('sigla'))); 
         $request->merge($input);
 
         // Validação
@@ -51,8 +51,8 @@ class ParceiroController extends Controller
         $parceiro = Parceiro::findOrFail($id);
 
         $input = $request->all();
-        $input['nome'] = strtoupper(trim($request->input('nome')));
-        $input['sigla'] = strtoupper(trim($request->input('sigla'))); 
+        $input['nome'] = mb_strtoupper(trim($request->input('nome')));
+        $input['sigla'] = mb_strtoupper(trim($request->input('sigla'))); 
         $request->merge($input);
 
         $request->validate([
@@ -72,8 +72,8 @@ class ParceiroController extends Controller
 
     public function destroy($id)
     {
-        if (Auth::user()->perfil !== 'ADMIN') {
-            abort(403, 'Apenas administradores podem excluir parceiros.');
+        if (Auth::user()->perfil !== 'ADMIN' && Auth::user()->perfil !== 'GERENTE') {
+            abort(403, 'Apenas administradores e gerentes podem excluir parceiros.');
         }
         
         // Verifica se tem produtos cadastrados
