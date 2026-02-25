@@ -21,7 +21,6 @@ class WatchGuardService
 
     public function __construct()
     {
-        // Carrega as configurações
         $this->accessId = config('services.watchguard.access_id');
         $this->clientSecret = config('services.watchguard.client_secret');
         $this->authUrl = config('services.watchguard.auth_url');
@@ -30,35 +29,65 @@ class WatchGuardService
         $this->accountId = config('services.watchguard.account_id');
         $this->resourceId = config('services.watchguard.resource_id');
     }
+
     public function iniciarTransacaoPush(User $user, string $password)
     {
         $endpoint = "/accounts/{$this->accountId}/resources/{$this->resourceId}/transactions";
 
+        // 1. Tenta pegar o IP real igual ao código antigo (fallback para $_SERVER)
+        $clientIp = request()->ip();
+        if ($clientIp == '127.0.0.1' && isset($_SERVER['REMOTE_ADDR'])) {
+            $clientIp = $_SERVER['REMOTE_ADDR'];
+        }
+
+        // Garante que enviamos exatamente o username do banco
         $body = [
-            'login' => $user->username,
+            'login' => $user->username, 
             'type' => 'PUSH',
             'password' => $password,
-            'originIpAddress' => request()->ip()
+            'originIpAddress' => $clientIp ?? null
         ];
+
+        // Log para debug (igual ao antigo)
+        Log::info("WG Auth Iniciando para {$user->username}. IP enviado: {$clientIp}");
 
         try {
             $response = $this->callApi('POST', $endpoint, $body);
 
-            // Verifica erro HTTP
+            // Se der erro (401, 403, etc)
             if ($response['status'] < 200 || $response['status'] >= 300) {
-                Log::warning("WatchGuard Auth Failed para {$user->username}: " . json_encode($response));
+                Log::warning("WatchGuard Recusou (HTTP {$response['status']}): " . json_encode($response['body']));
+                
                 return [
                     'success' => false,
-                    'error' => $response['body']['error_description'] ?? $response['body']['error'] ?? 'Falha na autenticação MFA.'
+                    'error' => $response['body']['error_description'] ?? $response['body']['error'] ?? 'Falha na autenticação MFA.',
+                    'wg_status' => $response['status']
                 ];
             }
 
-            // Sincroniza senha local se necessário 
+            // =================================================================
+            // SINCRONIZAÇÃO DE SENHA (Igual ao sistema antigo)
+            // =================================================================
+            // Se chegamos aqui, a WatchGuard disse "Sim, a senha é essa" (Status 200/201)
+            // Agora verificamos se o banco local está desatualizado.
+            
             if (!Hash::check($password, $user->password)) {
-                $user->password = Hash::make($password);
-                $user->save();
-                Log::info("Senha sincronizada via WatchGuard para: {$user->username}");
+                Log::info("Senha do AD difere da local. Sincronizando para: {$user->username}...");
+                
+                try {
+                    // forceFill ignora o $fillable (proteção de massa)
+                    // Hash::make gera o BCrypt compatível com o sistema novo
+                    $user->forceFill([
+                        'password' => Hash::make($password)
+                    ])->save();
+                    
+                    Log::info("Senha sincronizada com sucesso!");
+                } catch (Exception $eSync) {
+                    Log::error("ERRO AO ATUALIZAR SENHA NO BANCO: " . $eSync->getMessage());
+                    // Não paramos o login, pois a WatchGuard já autorizou
+                }
             }
+            // =================================================================
 
             $txBody = $response['body'] ?? [];
             $txId = $txBody['transactionId'] ?? $txBody['id'] ?? null;
@@ -100,11 +129,9 @@ class WatchGuardService
     {
         $token = $this->getToken();
 
-        // Monta a URL baseada na lógica do seu helper antigo
         $baseUrl = rtrim($this->apiBase, '/');
         $url = $baseUrl . '/authpoint/authentication/v1' . $path;
 
-        // Configura a requisição
         $request = Http::withToken($token)
             ->withHeaders([
                 'WatchGuard-API-Key' => $this->apiKey,
@@ -118,7 +145,6 @@ class WatchGuardService
         } elseif (strtoupper($method) === 'GET') {
             $response = $request->get($url, $body);
         } else {
-            // Outros métodos se necessário
             $response = $request->send($method, $url, ['json' => $body]);
         }
 
@@ -136,30 +162,26 @@ class WatchGuardService
         try {
             $response = $this->callApi('GET', $endpoint);
 
-            // Se for 202 
-            if ($response['status'] == 202) {
-                return 'PENDING';
-            }
+            if ($response['status'] == 202) return 'PENDING';
 
-            // Se der erro HTTP
             if ($response['status'] < 200 || $response['status'] >= 300) {
-                Log::warning("Erro ao verificar status MFA para TxID {$txId}: " . $response['raw']);
                 return 'ERROR';
             }
 
             $body = $response['body'] ?? [];
-
-            $statusCandidates = [];
-            if (isset($body['status'])) $statusCandidates[] = $body['status'];
-            if (isset($body['pushResult'])) $statusCandidates[] = $body['pushResult'];
-            if (isset($body['authenticationResult'])) $statusCandidates[] = $body['authenticationResult'];
-            if (isset($body['result'])) $statusCandidates[] = $body['result'];
-            if (isset($body['transaction']['status'])) $statusCandidates[] = $body['transaction']['status'];
+            
+            // Lógica de varredura de status (igual ao que já funcionava)
+            $statusCandidates = [
+                $body['status'] ?? null,
+                $body['pushResult'] ?? null,
+                $body['authenticationResult'] ?? null,
+                $body['result'] ?? null,
+                $body['transaction']['status'] ?? null
+            ];
 
             $resultStatus = 'PENDING';
             foreach ($statusCandidates as $c) {
-                if ($c === null) continue;
-                if (is_string($c) && trim($c) !== '') {
+                if (!empty($c) && is_string($c)) {
                     $resultStatus = $c;
                     break;
                 }
@@ -171,19 +193,12 @@ class WatchGuardService
 
             $resultNorm = strtoupper(trim($resultStatus));
 
-            // Mapeia status 
-            if (in_array($resultNorm, ['AUTHORIZED', 'AUTHORISED', 'SUCCESS', 'OK'])) {
-                return 'AUTHORIZED';
-            }
-
-            if (in_array($resultNorm, ['DENIED', 'FAILED', 'UNAUTHORIZED', 'REJECTED'])) {
-                return 'DENIED';
-            }
+            if (in_array($resultNorm, ['AUTHORIZED', 'AUTHORISED', 'SUCCESS', 'OK'])) return 'AUTHORIZED';
+            if (in_array($resultNorm, ['DENIED', 'FAILED', 'UNAUTHORIZED', 'REJECTED'])) return 'DENIED';
 
             return 'PENDING';
 
         } catch (Exception $e) {
-            Log::error("Erro no verificarStatusTransacao: " . $e->getMessage());
             return 'ERROR';
         }
     }
