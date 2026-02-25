@@ -3,59 +3,67 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest; 
-use App\Services\WatchGuardService;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\ValidationException;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Services\WatchGuardService; 
 
 class AuthenticatedSessionController extends Controller
 {
+    protected $watchGuardService;
+
+    public function __construct(WatchGuardService $watchGuardService)
+    {
+        $this->watchGuardService = $watchGuardService;
+    }
+
     public function create()
     {
         return view('auth.login');
     }
 
-    public function store(Request $request, WatchGuardService $watchGuard)
+    /**
+     * Handle an incoming authentication request.
+     */
+    public function store(Request $request)
     {
-        // Validar inputs básicos
+        $passwordField = $request->has('senha') ? 'senha' : 'password';
+
         $request->validate([
-            'login_identifier' => 'required|string', 
-            'senha' => 'required|string',
+            'login_identifier' => 'required|string',
+            $passwordField => 'required|string',
         ]);
 
-        $login = $request->input('login_identifier');
-        $password = $request->input('senha');
+        $loginValue = $request->input('login_identifier');
+        $passwordValue = $request->input($passwordField);
 
-        // Buscar usuário no banco 
-        $user = User::where('username', $login)
-                    ->orWhere('email', $login)
+        $user = User::where('username', $loginValue)
+                    ->orWhere('email', $loginValue)
                     ->first();
 
-        // Validar Senha Local
-        if (! $user || ! Hash::check($password, $user->password)) {
+        if (! $user || $user->status !== 'ATIVO') {
             return response()->json([
-                'message' => 'Credenciais inválidas no sistema local.'
-            ], 401);
+                'message' => 'Credenciais inválidas ou usuário inativo.'
+            ], 422);
         }
 
-        // Iniciar WatchGuard Push
-        Session::put('pending_user_id', $user->id); 
+        $resultado = $this->watchGuardService->iniciarTransacaoPush($user, $passwordValue);
+
+        if (!$resultado['success']) {
+            return response()->json([
+                'message' => 'Erro MFA: ' . ($resultado['error'] ?? 'Falha na autenticação.')
+            ], 422);
+        }
+
+        Session::forget('auth.password_confirmed_at');
+        Session::flush(); 
+        Session::put('pending_user_id', $user->id);
         
-        $resultado = $watchGuard->iniciarTransacaoPush($user, $password);
-
-        if (! $resultado['success']) {
-            return response()->json([
-                'message' => $resultado['error']
-            ], 401);
-        }
-
-        // Retorna o ID da transação para o JavaScript iniciar o polling
         return response()->json([
-            'flow' => 'push',
+            'success' => true,
             'transactionId' => $resultado['transactionId']
         ]);
     }
